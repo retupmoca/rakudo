@@ -80,13 +80,17 @@ class Perl6::Metamodel::ParametricRoleGroupHOW
         $prole.HOW.specialize_with($prole, $type_env, @pos_args)
     }
     
+    my class Lock is repr('ReentrantMutex') { }
+    my $lock := Lock.new;
     method get_selector($obj) {
+        nqp::lock($lock);
         if @!add_to_selector {
             for @!add_to_selector {
                 $!selector.add_dispatchee($_.HOW.body_block($_));
             }
             @!add_to_selector := [];
         }
+        nqp::unlock($lock);
         $!selector
     }
     
